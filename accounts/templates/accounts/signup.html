@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center"
+     style="min-height: 85vh; background-color: #ffffff;">
+    <div class="auth-container p-4 p-md-5"
+         style="width: 100%; max-width: 450px;">
+
+        <div class="text-center mb-5">
+            <h2 class="fw-bold" style="letter-spacing: -1px;">
+                Create Account
+            </h2>
+            <p class="text-muted small">
+                Join us to start your premium shopping experience.
+            </p>
+        </div>
+
+        <form method="POST" class="modern-form">
+            {% csrf_token %}
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-danger py-2 border-0 shadow-sm mb-4"
+                 style="font-size: 0.85rem;">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div class="mb-4">
+                <label class="form-label small fw-bold text-uppercase
+                              text-muted tracking-wider">
+                    Username
+                </label>
+                <div class="input-wrapper">
+                    {{ form.username }}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label small fw-bold text-uppercase
+                              text-muted tracking-wider">
+                    Email Address
+                </label>
+                <div class="input-wrapper">
+                    {{ form.email }}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label small fw-bold text-uppercase
+                              text-muted tracking-wider">
+                    Password
+                </label>
+                <div class="input-wrapper">
+                    {{ form.password }}
+                </div>
+            </div>
+
+            <button type="submit"
+                    class="btn btn-dark w-100 py-3 fw-bold text-uppercase
+                           mt-2 shadow-sm"
+                    style="letter-spacing: 1.5px; border-radius: 4px;
+                           font-size: 0.85rem;">
+                Create Account
+            </button>
+
+            <p class="mt-5 text-center text-muted small">
+                Already registered?
+                <a href="/accounts/login/"
+                   class="text-dark fw-bold text-decoration-none
+                          border-bottom border-dark pb-1 ms-1">
+                    Login
+                </a>
+            </p>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Scoped Styles for Auth */
+    .auth-container {
+        background: #fff;
+    }
+
+    .tracking-wider {
+        letter-spacing: 0.08rem;
+    }
+
+    /* Target the Django-generated inputs specifically */
+    .modern-form input {
+        display: block;
+        width: 100%;
+        padding: 0.8rem 1rem;
+        font-size: 0.95rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        background-color: #f8f9fa; /* Soft gray background */
+        background-clip: padding-box;
+        border: 1px solid #f8f9fa; /* Border starts invisible */
+        border-radius: 4px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .modern-form input:focus {
+        background-color: #fff;
+        border-color: #000;
+        outline: 0;
+        box-shadow: none;
+    }
+
+    /* Submit Button Hover */
+    .btn-dark {
+        transition: all 0.3s ease;
+    }
+
+    .btn-dark:hover {
+        background-color: #333;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+        .auth-container {
+            padding: 2rem 1.5rem !important;
+        }
+    }
+</style>
+{% endblock %}

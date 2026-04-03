@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load cart_tag %}
+
+{% block content %}
+<div class="container my-5 py-md-4">
+    <div class="row g-5">
+        <div class="col-lg-7">
+            <div class="checkout-form-section">
+                <h2 class="fw-bold mb-4" style="letter-spacing: -1px;">
+                    Shipping Details
+                </h2>
+
+                <form method="POST" action="{% url 'checkout' %}"
+                      class="modern-form">
+                    {% csrf_token %}
+
+                    <div class="row g-3 custom-form-fields">
+                        {% for field in form %}
+                        <div class="col-12 mb-2">
+                            <label class="form-label small fw-bold
+                                          text-uppercase text-muted
+                                          tracking-wider">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% if field.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ field.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mt-5 pt-4 border-top">
+                        <h5 class="fw-bold mb-3">Payment Method</h5>
+                        <div class="payment-options">
+                            <label class="payment-card d-flex
+                                          align-items-center p-3 mb-2
+                                          border rounded-3
+                                          cursor-pointer">
+                                <input type="radio" name="payment_method"
+                                       value="COD" checked class="me-3">
+                                <div>
+                                    <span class="d-block fw-bold">
+                                        Cash on Delivery
+                                    </span>
+                                    <small class="text-muted">
+                                        Pay when your package arrives.
+                                    </small>
+                                </div>
+                            </label>
+
+                            <label class="payment-card d-flex
+                                          align-items-center p-3
+                                          border rounded-3
+                                          cursor-pointer">
+                                <input type="radio" name="payment_method"
+                                       value="CARD" class="me-3">
+                                <div>
+                                    <span class="d-block fw-bold">
+                                        Credit/Debit Card
+                                    </span>
+                                    <small class="text-muted">
+                                        Secure online payment via gateway.
+                                    </small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-dark w-100 py-3 mt-5 fw-bold
+                                   text-uppercase rounded-pill shadow-sm"
+                            style="letter-spacing: 1px;">
+                        Place Order
+                    </button>
+
+                    <p class="text-center text-muted mt-3 extra-small">
+                        By placing your order, you agree to our Terms.
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="order-summary-sidebar p-4 p-md-5 rounded-4
+                        bg-light sticky-top" style="top: 2rem;">
+                <h4 class="fw-bold mb-4">Order Summary</h4>
+
+                <div class="summary-items-list mb-4">
+                    {% for item in cart_items %}
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="position-relative me-3">
+                            <img src="{{ item.product.image.url }}"
+                                 alt="{{ item.product.name }}"
+                                 class="rounded-2" width="60"
+                                 height="70"
+                                 style="object-fit: cover;
+                                        background: #fff;">
+                            <span class="position-absolute top-0
+                                         start-100 translate-middle
+                                         badge rounded-pill
+                                         bg-secondary"
+                                  style="font-size: 0.65rem;">
+                                {{ item.quantity }}
+                            </span>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 small fw-bold">
+                                {{ item.product.name }}
+                            </h6>
+                            <small class="text-muted">
+                                Rs. {{ item.product.price }}
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <span class="small fw-bold">
+                                Rs. {{ item.product.price|mul:item.quantity }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="border-top pt-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal</span>
+                        <span class="fw-medium">
+                            Rs. {{ cart_items|total_cart_price }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Shipping</span>
+                        <span class="text-success fw-bold small
+                                     text-uppercase">Free</span>
+                    </div>
+                    <div class="d-flex justify-content-between mt-4">
+                        <span class="h5 fw-bold">Total</span>
+                        <span class="h5 fw-bold">
+                            Rs. {{ cart_items|total_cart_price }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-form-fields input,
+    .custom-form-fields textarea,
+    .custom-form-fields select {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        transition: border-color .15s ease-in-out;
+    }
+
+    .custom-form-fields input:focus {
+        border-color: #000;
+        outline: 0;
+        box-shadow: none;
+    }
+
+    .payment-card {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .payment-card:hover {
+        background-color: #f8f9fa;
+        border-color: #000 !important;
+    }
+
+    .payment-card input[type="radio"]:checked + div {
+        color: #000;
+    }
+
+    .extra-small { font-size: 0.7rem; }
+    .tracking-wider { letter-spacing: 1px; }
+    .cursor-pointer { cursor: pointer; }
+
+    .summary-items-list img {
+        border: 1px solid #eee;
+    }
+
+    @media (max-width: 991px) {
+        .order-summary-sidebar {
+            margin-top: 3rem;
+        }
+    }
+</style>
+{% endblock %}

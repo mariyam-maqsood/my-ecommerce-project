@@ -1,0 +1,13 @@
+<h2>Thank you for your order, {{ order.name }}!</h2>
+<p>Order ID: {{ order.id }}</p>
+<p>Total: Rs. {{ order.total }}</p>
+
+<h3>Items:</h3>
+<ul>
+{% for item in order.items.all %}
+  <li>{{ item.product.name }} x {{ item.quantity }} = Rs. {{ item.subtotal }}</li>
+{% endfor %}
+</ul>
+
+<p>Payment Method: {{ order.payment_method }}</p>
+<p>We will notify you once your order is shipped.</p>

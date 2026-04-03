@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5 py-md-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb"
+            style="font-size: 0.75rem; text-transform: uppercase;
+                   letter-spacing: 1px;">
+            <li class="breadcrumb-item">
+                <a href="/" class="text-decoration-none text-muted">Home</a>
+            </li>
+            <li class="breadcrumb-item active text-dark fw-bold"
+                aria-current="page">
+                {{ product.name }}
+            </li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <div class="col-md-7">
+            <div class="product-gallery">
+                <img src="{{ product.image.url }}"
+                     class="img-fluid rounded-3 shadow-sm w-100"
+                     alt="{{ product.name }}"
+                     style="background-color: #f8f9fa; object-fit: cover;">
+            </div>
+        </div>
+
+        <div class="col-md-5 ps-lg-5">
+            <div class="product-info-sticky">
+                <h1 class="fw-bold mb-2"
+                    style="font-size: 2rem; letter-spacing: -0.5px;">
+                    {{ product.name }}
+                </h1>
+                <h4 class="mb-4" style="font-weight: 400; color: #444;">
+                    Rs. {{ product.price }}
+                </h4>
+
+                <div class="description-section mb-5">
+                    <p class="text-muted"
+                       style="line-height: 1.7; font-size: 0.95rem;">
+                        {{ product.description }}
+                    </p>
+                </div>
+
+                <div class="action-buttons">
+                    {% if product.stock > 0 %}
+                    <form method="POST"
+                          action="{% url 'add_to_cart' product.id %}"
+                          class="mb-3">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn btn-dark w-100 py-3
+                                           fw-bold text-uppercase"
+                                style="letter-spacing: 1px;
+                                           border-radius: 4px;
+                                           font-size: 0.85rem;">
+                            Add to Cart
+                        </button>
+                    </form>
+
+                    <form method="POST"
+                          action="{% url 'buy_now' product.id %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn btn-outline-dark w-100
+                                           py-3 fw-bold text-uppercase"
+                                style="letter-spacing: 1px;
+                                           border-radius: 4px;
+                                           font-size: 0.85rem;">
+                            Buy Now
+                        </button>
+                    </form>
+                    {% else %}
+                    <button class="btn btn-light w-100 py-3 border
+                                       text-muted fw-bold text-uppercase"
+                            disabled
+                            style="border-radius: 4px;
+                                       font-size: 0.85rem;">
+                        Currently Out of Stock
+                    </button>
+                    {% endif %}
+                </div>
+
+                <div class="mt-5 pt-4 border-top">
+                    <div class="row text-center text-md-start">
+                        <div class="col-6 mb-3">
+                            <small class="fw-bold d-block">
+                                Secure Payment
+                            </small>
+                            <small class="text-muted">
+                                100% safe checkout
+                            </small>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <small class="fw-bold d-block">
+                                Fast Delivery
+                            </small>
+                            <small class="text-muted">
+                                Ships in 2-3 days
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (min-width: 768px) {
+        .product-info-sticky {
+            position: sticky;
+            top: 2rem;
+        }
+    }
+
+    .btn-dark:hover {
+        background-color: #333;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn-outline-dark {
+        border-width: 2px;
+    }
+
+    .btn-outline-dark:hover {
+        background-color: #000;
+        color: #fff;
+    }
+
+    .description-section {
+        border-left: 2px solid #f1f1f1;
+        padding-left: 1.25rem;
+    }
+</style>
+{% endblock %}

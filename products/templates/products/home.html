@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5 px-3 px-lg-5">
+    <div class="mb-5 px-2">
+        <h2 class="fw-bold h4 mb-1">Featured Products</h2>
+        <div class="theme-line"></div>
+    </div>
+
+    <div class="row g-3 g-md-4 g-lg-5">
+        {% for product in products %}
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="modern-card">
+                <div class="card-img-container">
+                    <a href="{% url 'product_detail' product.id %}"
+                       class="product-image-link">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}"
+                             class="main-img"
+                             alt="{{ product.name }}">
+                        {% else %}
+                        <img src="https://via.placeholder.com/400x500?text=No+Image"
+                             class="main-img"
+                             alt="No Image">
+                        {% endif %}
+                    </a>
+
+                    <div class="hover-overlay">
+                        <a href="{% url 'add_to_cart' product.id %}"
+                           class="btn-quick-add">
+                            + Quick Add
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-details mt-3">
+                    <h2 class="product-title">
+                        <a href="{% url 'product_detail' product.id %}">
+                            {{ product.name }}
+                        </a>
+                    </h2>
+
+                    <p class="product-desc text-muted">
+                        {{ product.description|truncatewords:4 }}
+                    </p>
+
+                    <div class="d-flex justify-content-between
+                                align-items-center">
+                        <span class="product-price">
+                            Rs. {{ product.price }}
+                        </span>
+                        <span class="theme-dot"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    :root {
+        --brand-yellow: #f1c40f;
+        --brand-black: #1a1a1a;
+    }
+
+    .theme-line {
+        width: 40px;
+        height: 3px;
+        background-color: var(--brand-black);
+        border-radius: 2px;
+    }
+
+    .modern-card {
+        width: 100%;
+        margin-bottom: 20px;
+        transition: transform 0.3s ease;
+    }
+
+    .card-img-container {
+        position: relative;
+        aspect-ratio: 4 / 5;
+        overflow: hidden;
+        border-radius: 12px;
+        background-color: #f8f9fa;
+    }
+
+    .product-image-link {
+        display: block;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    .main-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+
+    .modern-card:hover .main-img {
+        transform: scale(1.08);
+    }
+
+    .hover-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(
+            to top,
+            rgba(0,0,0,0.3),
+            transparent
+        );
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+        z-index: 10;
+    }
+
+    .modern-card:hover .hover-overlay {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .btn-quick-add {
+        display: block;
+        width: 100%;
+        background: #fff;
+        color: var(--brand-black);
+        text-align: center;
+        text-decoration: none;
+        padding: 10px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-radius: 6px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .btn-quick-add:hover {
+        background: var(--brand-yellow);
+        color: var(--brand-black);
+    }
+
+    .product-title a {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--brand-black);
+        text-decoration: none;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .product-title a:hover {
+        color: #555;
+    }
+
+    .product-desc {
+        font-size: 0.85rem;
+        line-height: 1.4;
+        overflow: hidden;
+    }
+
+    .product-price {
+        font-weight: 800;
+        font-size: 0.9rem;
+        color: var(--brand-black);
+        border-left: 3px solid var(--brand-yellow);
+        padding-left: 8px;
+    }
+
+    .theme-dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--brand-yellow);
+        border-radius: 50%;
+    }
+
+    @media (max-width: 768px) {
+        .hover-overlay {
+            opacity: 1;
+            background: transparent;
+            transform: translateY(0);
+            padding: 8px;
+        }
+        .btn-quick-add {
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 0.65rem;
+            padding: 6px;
+        }
+    }
+</style>
+{% endblock %}

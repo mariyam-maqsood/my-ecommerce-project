@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="fw-bold mb-4" style="letter-spacing: -1px;">My Orders</h2>
+
+    {% if orders %}
+    <div class="order-list">
+        {% for order in orders %}
+        <div class="order-card mb-4 border shadow-sm rounded-4 bg-white p-4">
+
+            <div class="d-flex justify-content-between align-items-start
+                            border-bottom pb-3">
+                <div>
+                        <span class="text-uppercase small fw-bold text-muted
+                                     tracking-wider">
+                            Order ID
+                        </span>
+                    <h5 class="fw-bold mb-1">#{{ order.id }}</h5>
+                    <small class="text-muted">
+                        <b>Ordered:</b> {{ order.created_at|date:"M d, Y" }}
+                    </small>
+                </div>
+
+                <div class="text-end">
+                        <span class="text-uppercase small fw-bold text-muted
+                                     d-block">
+                            Total Amount
+                        </span>
+                    <span class="h5 fw-bold text-dark">
+                            Rs. {{ order.total }}
+                        </span>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center
+                            mt-3 p-2 bg-light rounded-3">
+                <div>
+                        <span class="badge rounded-pill px-3 py-2
+                            {% if order.status|lower == 'pending' %}
+                                bg-warning text-dark
+                            {% elif order.status|lower == 'shipped' %}
+                                bg-info text-dark
+                            {% elif order.status|lower == 'delivered' %}
+                                bg-success text-white
+                            {% elif order.status|lower == 'cancelled' %}
+                                bg-danger text-white
+                            {% else %}
+                                bg-secondary
+                            {% endif %}">
+                            {{ order.status }}
+                        </span>
+                    <span class="ms-2 small text-muted font-monospace">
+                            {{ order.payment_method }}
+                        </span>
+                </div>
+
+                {% if order.status|lower == 'pending' %}
+                <form method="POST"
+                      action="{% url 'cancel_order' order.id %}"
+                      class="m-0">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="btn btn-sm btn-outline-danger
+                                           px-3 fw-bold text-uppercase"
+                            style="font-size: 0.7rem;
+                                           letter-spacing: 0.5px;"
+                            onclick="return confirm('Cancel order?');">
+                        Cancel Order
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
+            <div class="order-items mt-4">
+                {% for item in order.orderitem_set.all %}
+                <div class="d-flex justify-content-between
+                                align-items-center mb-3">
+                    <div class="d-flex align-items-center">
+                        {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}"
+                             class="rounded-3 border me-3"
+                             style="width: 60px; height: 60px;
+                                            object-fit: cover;">
+                        {% endif %}
+                        <div>
+                            <h6 class="mb-0 fw-bold">
+                                {{ item.product.name }}
+                            </h6>
+                            <small class="text-muted">
+                                Quantity: {{ item.quantity }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="fw-bold">Rs. {{ item.subtotal }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-box-seam display-1 text-light mb-4 d-block"></i>
+        <h4 class="fw-bold">No orders yet</h4>
+        <p class="text-muted">
+            Once you place an order, it will appear here.
+        </p>
+        <a href="/" class="btn btn-dark px-4 py-2 mt-2 rounded-pill">
+            Start Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .tracking-wider { letter-spacing: 1px; }
+    .order-card { transition: transform 0.2s ease; }
+    .order-card:hover { transform: translateY(-3px); }
+</style>
+{% endblock %}
