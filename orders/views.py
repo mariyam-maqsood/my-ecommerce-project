@@ -7,7 +7,6 @@ from django.core.mail import EmailMessage
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
-from django.views.decorators.csrf import csrf_exempt
 
 from products.models import Product
 from .forms import CheckoutForm
@@ -241,7 +240,6 @@ def stripe_success(request):
     return redirect('order_success', order_id=order.id)
 
 
-@csrf_exempt
 def stripe_webhook(request):
     """Handle Stripe webhook events for asynchronous payment verification."""
     payload = request.body
