@@ -1,6 +1,7 @@
-from django.views import View
 from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
+from django.views import View
+
 from .models import Product, Category
 
 
@@ -32,7 +33,7 @@ def product_detail(request, id):
 
 
 def all_categories(request):
-    """Context processor to provide all categories to templates."""
+    """Provide all categories to templates."""
     categories = Category.objects.all()
     return {'categories': categories}
 

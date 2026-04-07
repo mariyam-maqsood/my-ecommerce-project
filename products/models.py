@@ -1,8 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import User
 
 
 class Category(models.Model):
+    """ Represents a product category. """
     name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
@@ -10,6 +10,7 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+    """ Represents an individual product and stores its details. """
     name = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
