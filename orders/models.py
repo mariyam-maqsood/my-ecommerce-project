@@ -1,5 +1,6 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
+
 from products.models import Product
 
 
@@ -18,7 +19,7 @@ class Cart(models.Model):
 
     @property
     def total_price(self):
-        """Calculate the total monetary value of all items in the cart."""
+        """Calculate the total price of all items in the cart."""
         return sum(
             item.quantity * item.product.price for item in self.items.all()
         )
@@ -77,7 +78,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    """Line item for a completed order, capturing price at time of sale."""
+    """Line item for a completed order."""
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE, related_name='items'
     )
