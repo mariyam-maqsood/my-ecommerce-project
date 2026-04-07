@@ -2,10 +2,22 @@
 
 {% block content %}
 <div class="container my-5 px-3 px-lg-5">
+     {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-dark alert-dismissible fade show border-0 shadow-sm mb-4 bg-dark text-white" role="alert">
+            <small class="fw-bold">{{ message }}</small>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
     <div class="mb-5 px-2">
         <h2 class="fw-bold h4 mb-1">Featured Products</h2>
         <div class="theme-line"></div>
     </div>
+
+
+
 
     <div class="row g-3 g-md-4 g-lg-5">
         {% for product in products %}

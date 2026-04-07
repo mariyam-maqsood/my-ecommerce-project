@@ -1,13 +1,81 @@
-<h2>Thank you for your order, {{ order.name }}!</h2>
-<p>Order ID: {{ order.id }}</p>
-<p>Total: Rs. {{ order.total }}</p>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f9f9f9; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333333;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border: 1px solid #eeeeee; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
 
-<h3>Items:</h3>
-<ul>
-{% for item in order.items.all %}
-  <li>{{ item.product.name }} x {{ item.quantity }} = Rs. {{ item.subtotal }}</li>
-{% endfor %}
-</ul>
+                    <tr>
+                        <td align="center" style="padding: 40px 20px; background-color: #111111;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px; letter-spacing: 2px; text-transform: uppercase; font-weight: 800;">ECOMMERCE.</h1>
+                        </td>
+                    </tr>
 
-<p>Payment Method: {{ order.payment_method }}</p>
-<p>We will notify you once your order is shipped.</p>
+                    <tr>
+                        <td style="padding: 40px;">
+                            <h2 style="margin: 0 0 10px 0; font-size: 22px; color: #111111;">Thank you for your order, {{ order.name }}!</h2>
+                            <p style="margin: 0; font-size: 16px; color: #666666; line-height: 1.5;">We've received your order and are getting it ready for shipment.</p>
+
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 30px; border-top: 1px solid #eeeeee; padding-top: 20px;">
+                                <tr>
+                                    <td style="font-size: 14px; font-weight: bold; color: #111111; text-transform: uppercase; letter-spacing: 1px;">Order ID: #{{ order.id }}</td>
+                                    <td align="right" style="font-size: 14px; color: #999999;">{{ order.created_at|date:"M d, Y" }}</td>
+                                </tr>
+                            </table>
+
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 20px;">
+                                {% for item in order.items.all %}
+                                <tr>
+                                    <td style="padding: 12px 0; border-bottom: 1px solid #f4f4f4;">
+                                        <span style="font-size: 16px; font-weight: 600; color: #111111;">{{ item.product.name }}</span>
+                                        <br>
+                                        <span style="font-size: 13px; color: #999999;">Quantity: {{ item.quantity }}</span>
+                                    </td>
+                                    <td align="right" style="padding: 12px 0; border-bottom: 1px solid #f4f4f4; font-size: 16px; font-weight: 600; color: #111111;">
+                                        Rs. {{ item.subtotal }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 20px;">
+                                <tr>
+                                    <td style="font-size: 15px; color: #666666;">Payment Method</td>
+                                    <td align="right" style="font-size: 15px; color: #111111; font-weight: bold;">{{ order.payment_method }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-top: 15px; font-size: 18px; font-weight: 800; color: #111111;">Total Amount</td>
+                                    <td align="right" style="padding-top: 15px; font-size: 20px; font-weight: 800; color: #111111;">Rs. {{ order.total }}</td>
+                                </tr>
+                            </table>
+
+<!--                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 40px;">-->
+<!--                                <tr>-->
+<!--                                    <td align="center">-->
+<!--                                        <a href="{{ request.build_absolute_uri|slice:':-1' }}/orders/history/" style="background-color: #111111; color: #ffffff; padding: 15px 30px; text-decoration: none; font-size: 14px; font-weight: bold; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; display: inline-block;">View Order History</a>-->
+<!--                                    </td>-->
+<!--                                </tr>-->
+<!--                            </table>-->
+                        </td>
+                    </tr>
+
+<!--                    <tr>-->
+<!--                        <td align="center" style="padding: 30px; background-color: #fcfcfc; border-top: 1px solid #eeeeee;">-->
+<!--                            <p style="margin: 0; font-size: 12px; color: #999999; line-height: 1.5;">-->
+<!--                                If you have any questions, reply to this email or contact our support team.<br>-->
+<!--                                &copy; 2026 Ecommerce Inc. All rights reserved.-->
+<!--                            </p>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

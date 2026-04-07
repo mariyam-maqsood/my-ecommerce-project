@@ -22,6 +22,7 @@ def signup(request):
     """
     Handle user registration and send email verification.
     """
+    # print("Reuest data",request)
     if request.method == "POST":
         form = SignupForm(request.POST)
 
@@ -41,7 +42,7 @@ def signup(request):
                     username=username,
                     email=email,
                     password=password,
-                    is_active=False,  # Activate after email verification
+                    is_active=False,
                 )
 
                 # Create associated empty profile
@@ -173,7 +174,6 @@ def edit_profile(request):
 
             messages.error(request, "Please fix the errors below.")
 
-        # Handle password change form
         elif "change_password" in request.POST:
             if password_form.is_valid():
                 user = password_form.save()
@@ -203,7 +203,6 @@ def edit_profile(request):
     return render(request, "accounts/edit_profile.html", context)
 
 
-# Password Reset Views
 class CustomPasswordResetView(auth_views.PasswordResetView):
     """Handle password reset request."""
     template_name = "accounts/password_reset.html"

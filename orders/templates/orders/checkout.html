@@ -192,8 +192,26 @@
         border: 1px solid #eee;
     }
 
+    /* Fix: Ensure sidebar stays below navbar when scrolling */
+    .order-summary-sidebar {
+        /* The offset should be slightly more than your navbar height.
+           Since your navbar is sticky, 4.5rem to 5rem is usually safe.
+        */
+        top: 5.5rem !important;
+        z-index: 1000 !important; /* Lower than Bootstrap's sticky navbar (1020) */
+        position: -webkit-sticky;
+        position: sticky;
+    }
+
+    /* Additional safety for the navbar itself */
+    .navbar.sticky-top {
+        z-index: 1030 !important; /* Force navbar to be the top-most layer */
+    }
+
+    /* Mobile adjustments */
     @media (max-width: 991px) {
         .order-summary-sidebar {
+            position: static !important; /* Disable sticky on mobile so it flows naturally */
             margin-top: 3rem;
         }
     }

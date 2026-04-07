@@ -55,20 +55,20 @@
                         </span>
                 </div>
 
-                {% if order.status|lower == 'pending' %}
-                <form method="POST"
-                      action="{% url 'cancel_order' order.id %}"
-                      class="m-0">
-                    {% csrf_token %}
-                    <button type="submit"
-                            class="btn btn-sm btn-outline-danger
-                                           px-3 fw-bold text-uppercase"
-                            style="font-size: 0.7rem;
-                                           letter-spacing: 0.5px;"
-                            onclick="return confirm('Cancel order?');">
-                        Cancel Order
-                    </button>
-                </form>
+                {% if order.status|lower == 'pending' and order.payment_method == 'COD' %}
+                    <form method="POST"
+                          action="{% url 'cancel_order' order.id %}"
+                          class="m-0">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn btn-sm btn-outline-danger
+                                               px-3 fw-bold text-uppercase"
+                                style="font-size: 0.7rem;
+                                               letter-spacing: 0.5px;"
+                                onclick="return confirm('Cancel order?');">
+                            Cancel Order
+                        </button>
+                    </form>
                 {% endif %}
             </div>
 

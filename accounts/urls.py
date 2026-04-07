@@ -2,12 +2,15 @@ from django.urls import path
 
 from . import views
 
-
 urlpatterns = [
     # Authentication
     path("signup/", views.signup, name="signup"),
     path("login/", views.user_login, name="login"),
     path("logout/", views.user_logout, name="logout"),
+
+    # SSO
+    # path('accounts/', include('allauth.urls')),
+    # path('auth/', include('social_django.urls', namespace='social')),
 
     # Profile
     path("edit-profile/", views.edit_profile, name="edit_profile"),

@@ -2,6 +2,14 @@
 
 {% block content %}
 <div class="container my-5 py-md-4">
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-dark alert-dismissible fade show border-0 shadow-sm mb-4 bg-dark text-white" role="alert">
+            <small class="fw-bold">{{ message }}</small>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb"
             style="font-size: 0.75rem; text-transform: uppercase;
