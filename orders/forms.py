@@ -1,9 +1,10 @@
 from django import forms
+
 from .models import Order
 
 
 class CheckoutForm(forms.ModelForm):
-    """Form for capturing shipping and contact details during checkout."""
+    """Form for adding shipping and contact details during checkout."""
 
     class Meta:
         model = Order
