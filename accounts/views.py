@@ -22,7 +22,7 @@ def signup(request):
     """
     Handle user registration and send email verification.
     """
-    # print("Reuest data",request)
+    # print("Request data",request)
     if request.method == "POST":
         form = SignupForm(request.POST)
 

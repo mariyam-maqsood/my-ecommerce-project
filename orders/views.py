@@ -1,15 +1,17 @@
 import stripe
-from django.http import HttpResponse
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMessage
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.conf import settings
+
 from products.models import Product
-from .models import Cart, CartItem, Order, OrderItem
 from .forms import CheckoutForm
+from .models import Cart, CartItem, Order, OrderItem
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -257,7 +259,9 @@ def stripe_webhook(request):
         session = event['data']['object']
         user_id = session['metadata']['user_id']
 
-        from django.contrib.auth import get_user_model
+        if Order.objects.filter(payment_id=session.id).exists():
+            return HttpResponse(status=200)
+
         User = get_user_model()
         user = User.objects.get(id=user_id)
 
