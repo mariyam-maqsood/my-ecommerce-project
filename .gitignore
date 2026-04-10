@@ -1,14 +1,35 @@
+# Environment
+.env
+.env.*
+
 # Python
 *.pyc
+*.pyo
 __pycache__/
+*.py[cod]
 
 # Django
 db.sqlite3
-*.log
-media/
 staticfiles/
-.env
+media/
+*.log
 
-# IDEs
-.vscode/
+# Virtual environment
+venv/
+env/
+.venv/
+
+# PyCharm
 .idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Coverage/testing
+.coverage
+htmlcov/
+
+# Migrations (optional — most projects keep these)
+# */migrations/

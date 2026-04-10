@@ -4,7 +4,6 @@ register = template.Library()
 
 @register.filter
 def mul(value, arg):
-    """Multiply two numbers"""
     try:
         return float(value) * int(arg)
     except (ValueError, TypeError):
