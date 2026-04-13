@@ -27,7 +27,7 @@
                     <a href="{% url 'product_detail' product.id %}"
                        class="product-image-link">
                         {% if product.image %}
-                        <img src="{{ product.image.url }}"
+                        <img src="{{ product.image }}"
                              class="main-img"
                              alt="{{ product.name }}">
                         {% else %}

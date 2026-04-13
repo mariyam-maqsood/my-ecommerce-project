@@ -1,4 +1,3 @@
-from cloudinary_storage.storage import MediaCloudinaryStorage
 from django.db import models
 
 
@@ -17,7 +16,7 @@ class Product(models.Model):
     description = models.TextField()
     stock = models.PositiveIntegerField()
     is_available = models.BooleanField(default=True)
-    image = models.ImageField(upload_to='images/', storage=MediaCloudinaryStorage())
+    image = models.CharField(max_length=500, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
