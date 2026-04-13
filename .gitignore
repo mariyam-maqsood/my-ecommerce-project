@@ -33,3 +33,5 @@ htmlcov/
 
 # Migrations (optional — most projects keep these)
 # */migrations/
+
+data.json
