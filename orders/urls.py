@@ -1,4 +1,5 @@
 from django.urls import path
+
 from . import views
 
 urlpatterns = [
@@ -11,7 +12,7 @@ urlpatterns = [
     path('success/<int:order_id>/', views.order_success, name='order_success'),
     path('stripe-checkout/', views.create_checkout_session, name='stripe_checkout'),
     path('success-stripe/', views.stripe_success, name='stripe_success'),
-    path('stripe-webhook/', views.stripe_webhook, name='stripe_webhook'),
+    # path('stripe-webhook/', views.stripe_webhook, name='stripe_webhook'),
     path('history/', views.order_history, name='order_history'),
     path('cancel_order/<int:order_id>/', views.cancel_order, name='cancel_order'),
 

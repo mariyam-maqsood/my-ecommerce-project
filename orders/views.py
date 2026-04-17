@@ -7,6 +7,7 @@ from django.core.mail import EmailMessage
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
+from django.views.decorators.csrf import csrf_exempt
 
 from products.models import Product
 from .forms import CheckoutForm
@@ -239,7 +240,7 @@ def stripe_success(request):
 
     return redirect('order_success', order_id=order.id)
 
-
+@csrf_exempt
 def stripe_webhook(request):
     """Handle Stripe webhook events for asynchronous payment verification."""
     payload = request.body
@@ -253,12 +254,20 @@ def stripe_webhook(request):
     except (ValueError, stripe.error.SignatureVerificationError):
         return HttpResponse(status=400)
 
+    print('PRINTING EVENTSSSS!!!')
+    print('Event:', event)
+
     if event['type'] == 'checkout.session.completed':
+        # print('PRINTING EVENTSSSS!!!')
+        # print('Event:',event)
+
         session = event['data']['object']
         user_id = session['metadata']['user_id']
 
-        if Order.objects.filter(payment_id=session.id).exists():
-            return HttpResponse(status=200)
+        user_id = session.get('metadata', {}).get('user_id')
+        if not user_id:
+            return HttpResponse(status=400)
+        session_id = session['id']
 
         User = get_user_model()
         user = User.objects.get(id=user_id)
