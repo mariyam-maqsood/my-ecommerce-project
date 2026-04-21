@@ -231,6 +231,23 @@ def create_checkout_session(request):
     return redirect(session.url, code=303)
 
 
+# @login_required
+# def stripe_success(request):
+#     """Only display order after Stripe payment."""
+#     session_id = request.GET.get("session_id")
+#
+#     if not session_id:
+#         return redirect("checkout")
+#
+#     order = Order.objects.filter(
+#         stripe_session_id=session_id
+#     ).first()
+#
+#     if not order:
+#         return render(request, "waiting_for_payment.html")
+#
+#     return redirect("order_success", order_id=order.id)
+
 @login_required
 def stripe_success(request):
     """Handle successful Stripe redirection and create Order record."""
@@ -264,23 +281,6 @@ def stripe_success(request):
     del request.session['checkout_form']
 
     return redirect('order_success', order_id=order.id)
-
-# @login_required
-# def stripe_success(request):
-#     """Only display order after Stripe payment."""
-#     session_id = request.GET.get("session_id")
-#
-#     if not session_id:
-#         return redirect("checkout")
-#
-#     order = Order.objects.filter(
-#         stripe_session_id=session_id
-#     ).first()
-#
-#     if not order:
-#         return render(request, "waiting_for_payment.html")
-#
-#     return redirect("order_success", order_id=order.id)
 
 @csrf_exempt
 def stripe_webhook(request):
