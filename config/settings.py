@@ -31,9 +31,9 @@ STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 # DEBUG=True
 
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
 
-# ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com', 'https://f520-59-103-75-230.ngrok-free.app']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
 # , 'd639-59-103-75-230.ngrok-free.app'
 
 SITE_ID = 1
@@ -132,7 +132,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'apikey'
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = 'itsmariamahmad@gmail.com'
-
 
 TEMPLATES = [
     {
