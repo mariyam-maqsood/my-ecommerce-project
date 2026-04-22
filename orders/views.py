@@ -119,6 +119,14 @@ def checkout(request):
                 request.session['checkout_form'] = form.cleaned_data
                 return redirect('stripe_checkout')
 
+            # Check stock first
+            for item in cart_items:
+                if item.product.stock < item.quantity:
+                    messages.error(request,
+                                   f"Not enough stock for {item.product.name}")
+                    return redirect('view_cart')
+
+            # Then create order
             order = form.save(commit=False)
             order.user = request.user
             order.total = total_amount
@@ -126,16 +134,8 @@ def checkout(request):
             order.save()
 
             for item in cart_items:
-                if item.product.stock < item.quantity:
-                    messages.error(
-                        request,
-                        f"Not enough stock for {item.product.name}"
-                    )
-                    return redirect('view_cart')
-
                 item.product.stock -= item.quantity
                 item.product.save()
-
                 OrderItem.objects.create(
                     order=order,
                     product=item.product,
@@ -144,7 +144,6 @@ def checkout(request):
                 )
 
             cart.items.all().delete()
-            send_order_email(order)
             return redirect('order_success', order_id=order.id)
     else:
         form = CheckoutForm(initial={
@@ -156,7 +155,6 @@ def checkout(request):
         'form': form,
         'cart_items': cart_items
     })
-
 
 @login_required
 def place_order(request):
@@ -172,38 +170,8 @@ def place_order(request):
 @login_required
 def order_success(request, order_id):
     """Display confirmation page for a specific order."""
-    order = Order.objects.get(id=order_id)
-    return render(request, 'orders/order_success.html',
-            {'order': order})
-
-
-# @login_required
-# def create_checkout_session(request):
-#     """Initiate a Stripe Checkout Session."""
-#     cart, _ = Cart.objects.get_or_create(user=request.user)
-#     cart_items = cart.items.select_related('product').all()
-#     line_items = []
-#
-#     for item in cart_items:
-#         line_items.append({
-#             'price_data': {
-#                 'currency': 'pkr',
-#                 'product_data': {'name': item.product.name},
-#                 'unit_amount': int(item.product.price * 100),
-#             },
-#             'quantity': item.quantity,
-#         })
-#
-#     session = stripe.checkout.Session.create(
-#         payment_method_types=['card'],
-#         line_items=line_items,
-#         mode='payment',
-#         success_url='http://127.0.0.1:8000/orders/success-stripe/',
-#         cancel_url='http://127.0.0.1:8000/cart/',
-#         metadata={'user_id': request.user.id}
-#     )
-#
-#     return redirect(session.url, code=303)
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'orders/order_success.html', {'order': order})
 
 @login_required
 def create_checkout_session(request):
@@ -231,195 +199,87 @@ def create_checkout_session(request):
     return redirect(session.url, code=303)
 
 
-# @login_required
-# def stripe_success(request):
-#     """Only display order after Stripe payment."""
-#     session_id = request.GET.get("session_id")
-#
-#     if not session_id:
-#         return redirect("checkout")
-#
-#     order = Order.objects.filter(
-#         stripe_session_id=session_id
-#     ).first()
-#
-#     if not order:
-#         return render(request, "waiting_for_payment.html")
-#
-#     return redirect("order_success", order_id=order.id)
-
 @login_required
 def stripe_success(request):
-    """Handle successful Stripe redirection and create Order record."""
-    cart, _ = Cart.objects.get_or_create(user=request.user)
-    cart_items = cart.items.select_related('product').all()
-    form_data = request.session.get('checkout_form')
+    # Clean session if exists
+    request.session.pop('checkout_form', None)
 
-    if not form_data or not cart_items.exists():
-        return redirect('checkout')
-
-    total_amount = calculate_cart_total(cart_items)
-    order = Order.objects.create(
+    # Find the latest card order for this user
+    order = Order.objects.filter(
         user=request.user,
-        total=total_amount,
-        payment_method='CARD',
-        **form_data
-    )
+        payment_method='CARD'
+    ).order_by('-created_at').first()
 
-    for item in cart_items:
-        OrderItem.objects.create(
-            order=order,
-            product=item.product,
-            quantity=item.quantity,
-            subtotal=item.product.price * item.quantity
-        )
-        item.product.stock -= item.quantity
-        item.product.save()
-
-    cart.items.all().delete()
-    send_order_email(order)
-    del request.session['checkout_form']
+    if not order:
+        return redirect('checkout')
 
     return redirect('order_success', order_id=order.id)
 
 @csrf_exempt
 def stripe_webhook(request):
-    """Handle Stripe webhook events for asynchronous payment verification."""
     payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
     endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
 
     try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret
-        )
+        event = stripe.Webhook.construct_event(payload, sig_header,
+                                               endpoint_secret)
     except (ValueError, stripe.error.SignatureVerificationError):
         return HttpResponse(status=400)
 
-    print('PRINTING EVENTSSSS!!!')
-    print('Event:', event)
-
     if event['type'] == 'checkout.session.completed':
-        # print('PRINTING EVENTSSSS!!!')
-        # print('Event:',event)
+        try:
+            session = event['data']['object']
+            session_dict = session.to_dict()
 
-        session = event['data']['object']
-        user_id = session['metadata']['user_id']
+            user_id = session_dict.get('metadata', {}).get('user_id')
+            if not user_id:
+                return HttpResponse(status=400)
 
-        user_id = session.get('metadata', {}).get('user_id')
-        if not user_id:
-            return HttpResponse(status=400)
-        session_id = session['id']
+            User = get_user_model()
+            try:
+                user = User.objects.get(id=int(user_id))
+            except User.DoesNotExist:
+                return HttpResponse(status=400)
 
-        User = get_user_model()
-        user = User.objects.get(id=user_id)
+            cart, _ = Cart.objects.get_or_create(user=user)
+            cart_items = cart.items.select_related('product').all()
 
-        cart, _ = Cart.objects.get_or_create(user=user)
-        cart_items = cart.items.select_related('product').all()
+            if not cart_items.exists():
+                return HttpResponse(status=200)
 
-        if not cart_items.exists():
-            return HttpResponse(status=200)
+            customer_details = session_dict.get('customer_details') or {}
+            name = customer_details.get('name', '')
+            email = customer_details.get('email', '')
 
-        order = Order.objects.create(
-            user=user,
-            total=calculate_cart_total(cart_items),
-            payment_method='CARD',
-            name=session['customer_details']['name'],
-            email=session['customer_details']['email'],
-        )
-
-        for item in cart_items:
-            OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity,
-                subtotal=item.product.price * item.quantity
+            order = Order.objects.create(
+                user=user,
+                total=calculate_cart_total(cart_items),
+                payment_method='CARD',
+                name=name,
+                email=email,
             )
-            item.product.stock -= item.quantity
-            item.product.save()
 
-        cart.items.all().delete()
-        send_order_email(order)
+            for item in cart_items:
+                OrderItem.objects.create(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                    subtotal=item.product.price * item.quantity
+                )
+                item.product.stock -= item.quantity
+                item.product.save()
+
+            cart.items.all().delete()
+            print("ORDER CREATED SUCCESSFULLY:", order.id)
+
+        except Exception as e:
+            import traceback
+            print("500 ERROR DETAILS:")
+            print(traceback.format_exc())
+            return HttpResponse(status=500)
 
     return HttpResponse(status=200)
-
-# @csrf_exempt
-# def stripe_webhook(request):
-#     payload = request.body
-#     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
-#     endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
-#
-#     try:
-#         event = stripe.Webhook.construct_event(
-#             payload, sig_header, endpoint_secret
-#         )
-#         print("Event:", event['type'])
-#
-#     except Exception as e:
-#         print("❌ WEBHOOK ERROR:", str(e))
-#         return HttpResponse(status=400)
-#
-#     if event['type'] == 'checkout.session.completed':
-#         session = event['data']['object']
-#         print("SESSION:", session)
-#
-#         session_id = session['id']
-#
-#         if Order.objects.filter(stripe_session_id=session_id).exists():
-#             return HttpResponse(status=200)
-#
-#         user_id = session.get('metadata', {}).get('user_id')
-#
-#         if not user_id:
-#             print("❌ Missing user_id")
-#             return HttpResponse(status=400)
-#
-#         User = get_user_model()
-#
-#         try:
-#             user = User.objects.get(id=user_id)
-#         except User.DoesNotExist:
-#             print("User not found")
-#             return HttpResponse(status=400)
-#
-#         cart, _ = Cart.objects.get_or_create(user=user)
-#         cart_items = cart.items.select_related('product').all()
-#
-#         if not cart_items.exists():
-#             print("Cart empty")
-#             return HttpResponse(status=200)
-#
-#         customer_details = session.get('customer_details') or {}
-#
-#         order = Order.objects.create(
-#             user=user,
-#             stripe_session_id=session_id,
-#             total=calculate_cart_total(cart_items),
-#             payment_method='CARD',
-#             name=customer_details.get('name', ''),
-#             email=customer_details.get('email', ''),
-#         )
-#
-#         for item in cart_items:
-#             OrderItem.objects.create(
-#                 order=order,
-#                 product=item.product,
-#                 quantity=item.quantity,
-#                 subtotal=item.product.price * item.quantity
-#             )
-#             item.product.stock -= item.quantity
-#             item.product.save()
-#
-#         cart.items.all().delete()
-#
-#         try:
-#             send_order_email(order)
-#         except Exception as e:
-#             print(" Email failed:", e)
-#
-#     return HttpResponse(status=200)
-
-
 
 def send_order_email(order):
     """Send HTML order confirmation email to the user."""
@@ -430,14 +290,12 @@ def send_order_email(order):
     email.content_subtype = "html"
     email.send(fail_silently=False)
 
-
 @login_required
 def order_history(request):
     """Display list of past orders for the authenticated user."""
     orders = Order.objects.filter(user=request.user).order_by('-id')
     return render(request, 'orders/order_history.html',
                   {'orders': orders})
-
 
 @login_required
 def cancel_order(request, order_id):
@@ -462,7 +320,6 @@ def cancel_order(request, order_id):
             )
 
     return redirect('order_history')
-
 
 def send_cancel_email(order):
     """Send HTML cancellation email to the user."""
