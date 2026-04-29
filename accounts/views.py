@@ -42,7 +42,7 @@ def signup(request):
                     username=username,
                     email=email,
                     password=password,
-                    is_active=False,
+                    is_active=True,
                 )
 
                 # Create associated empty profile
@@ -53,11 +53,11 @@ def signup(request):
                     phone="",
                 )
 
-                send_verification_email(user)
+                # send_verification_email(user)
 
                 messages.success(
                     request,
-                    "Signup successful! Check your email to verify your account.",
+                    "Signup successful!",
                 )
                 return redirect("login")
     else:

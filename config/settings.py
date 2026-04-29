@@ -33,10 +33,12 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 # ALLOWED_HOSTS = ['*']
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com', 'https://8744-59-103-75-230.ngrok-free.app']
 # , 'd639-59-103-75-230.ngrok-free.app'
 
 SITE_ID = 1
+
+# SITE_URL = 'https://8744-59-103-75-230.ngrok-free.app'
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
@@ -80,12 +82,10 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_user',
     'social_core.pipeline.user.get_username',
     'social_core.pipeline.user.create_user',
-    'accounts.pipeline.create_user_profile',  # custom step — see step 5
+    'accounts.pipeline.create_user_profile',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
 )
-
-# Application definition
 
 INSTALLED_APPS = [
     'cloudinary',

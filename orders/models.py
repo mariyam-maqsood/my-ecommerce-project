@@ -38,7 +38,7 @@ class CartItem(models.Model):
         unique_together = ('cart', 'product')
 
     def __str__(self):
-        return f"{self.product.name} x {self.quantity}"
+        return f"{self.product.name}"
 
 
 class Order(models.Model):
@@ -58,6 +58,12 @@ class Order(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    stripe_session_id = models.CharField(
+        max_length=255,
+        unique=True,
+        null=True,
+        blank=True
+    )
     name = models.CharField(max_length=100)
     email = models.EmailField()
     phone = models.CharField(max_length=15)
@@ -72,8 +78,7 @@ class Order(models.Model):
 
     def __str__(self):
         return (
-            f"Order #{self.id} | {self.user.username} | "
-            f"Rs {self.total} | {self.status}"
+            f"{self.user.username}"
         )
 
 
@@ -87,4 +92,4 @@ class OrderItem(models.Model):
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"{self.product.name} x {self.quantity}"
+        return f"{self.product.name}"

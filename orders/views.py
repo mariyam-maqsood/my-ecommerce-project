@@ -166,12 +166,27 @@ def place_order(request):
     request.session['cart'] = {}
     return render(request, 'orders/order_success.html')
 
-
 @login_required
 def order_success(request, order_id):
     """Display confirmation page for a specific order."""
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'orders/order_success.html', {'order': order})
+
+@login_required
+def stripe_success(request):
+    # Clean session if exists
+    request.session.pop('checkout_form', None)
+
+    # Find the latest card order for this user
+    order = Order.objects.filter(
+        user=request.user,
+        payment_method='CARD'
+    ).order_by('-created_at').first()
+
+    if not order:
+        return redirect('checkout')
+
+    return redirect('order_success', order_id=order.id)
 
 @login_required
 def create_checkout_session(request):
@@ -194,26 +209,18 @@ def create_checkout_session(request):
         mode='payment',
         success_url=request.build_absolute_uri('/orders/success-stripe/'),
         cancel_url=request.build_absolute_uri('/cart/'),
-        metadata={'user_id': request.user.id}
+        # success_url=f"{settings.SITE_URL}/orders/success-stripe/",
+        # cancel_url=f"{settings.SITE_URL}/cart/",
+        metadata={'user_id': request.user.id,
+                  'phone': request.POST.get('phone'),
+                  'address': request.POST.get('address'),
+                  },
+            billing_address_collection = 'required',
+            phone_number_collection = {
+                'enabled': True
+            },
     )
     return redirect(session.url, code=303)
-
-
-@login_required
-def stripe_success(request):
-    # Clean session if exists
-    request.session.pop('checkout_form', None)
-
-    # Find the latest card order for this user
-    order = Order.objects.filter(
-        user=request.user,
-        payment_method='CARD'
-    ).order_by('-created_at').first()
-
-    if not order:
-        return redirect('checkout')
-
-    return redirect('order_success', order_id=order.id)
 
 @csrf_exempt
 def stripe_webhook(request):
@@ -221,16 +228,22 @@ def stripe_webhook(request):
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
     endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
 
+    # print("RAW PAYLOAD:", request.body)
+    # print("SIGNATURE:", sig_header)
+    # print("SECRET:", endpoint_secret)
+
     try:
         event = stripe.Webhook.construct_event(payload, sig_header,
                                                endpoint_secret)
     except (ValueError, stripe.error.SignatureVerificationError):
         return HttpResponse(status=400)
-
+    print("EVENT:", event)
     if event['type'] == 'checkout.session.completed':
+        print("Yaaayyyy session completed!!")
         try:
             session = event['data']['object']
             session_dict = session.to_dict()
+            stripe_session_id = session_dict.get("id")
 
             user_id = session_dict.get('metadata', {}).get('user_id')
             if not user_id:
@@ -251,13 +264,42 @@ def stripe_webhook(request):
             customer_details = session_dict.get('customer_details') or {}
             name = customer_details.get('name', '')
             email = customer_details.get('email', '')
+            print('email:', email)
+            print('data:',customer_details)
+            # metadata = session_dict.get('metadata') or {}
+            # phone = metadata.get('phone', '')
+            # address = metadata.get('address', '')
+
+            customer_details = session_dict.get('customer_details') or {}
+            phone = customer_details.get('phone', '')
+            address_data = customer_details.get('address') or {}
+            address = ", ".join(filter(None, [
+                address_data.get('line1'),
+                address_data.get('line2'),
+                address_data.get('city'),
+                address_data.get('state'),
+                address_data.get('postal_code'),
+                address_data.get('country'),
+            ]))
+
+            print('phone:', phone)
+            print('address:', address)
+
+            if Order.objects.filter(
+                    stripe_session_id=stripe_session_id
+            ).exists():
+                return HttpResponse(status=200)
 
             order = Order.objects.create(
                 user=user,
+                stripe_session_id=stripe_session_id,
                 total=calculate_cart_total(cart_items),
                 payment_method='CARD',
+                status='CONFIRMED',
                 name=name,
                 email=email,
+                address=address,
+                phone=phone,
             )
 
             for item in cart_items:
