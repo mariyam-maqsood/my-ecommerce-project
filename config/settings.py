@@ -33,8 +33,8 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 # ALLOWED_HOSTS = ['*']
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com', 'https://8744-59-103-75-230.ngrok-free.app']
-# , 'd639-59-103-75-230.ngrok-free.app'
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com', '8744-59-103-75-230.ngrok-free.app']
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 SITE_ID = 1
 
